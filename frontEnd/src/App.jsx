@@ -106,6 +106,16 @@ function App() {
     setUploadedFile(fileInfo);
   };
 
+  const handleClearFile = async () => {
+    try {
+      await axios.post('http://localhost:8000/clear-upload');
+      setUploadedFile(null);
+    } catch (error) {
+      console.error('Failed to clear file:', error);
+      setUploadedFile(null);
+    }
+  };
+
   return (
     <div className="app-container">
       <Sidebar
@@ -115,6 +125,7 @@ function App() {
         startNewChat={startNewChat}
         deleteChat={deleteChat}
         uploadedFile={uploadedFile}
+        onClearFile={handleClearFile}
       />
       <ChatArea
         activeChat={activeChat}

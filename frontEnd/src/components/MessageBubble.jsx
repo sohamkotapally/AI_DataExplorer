@@ -1,44 +1,6 @@
-import { Zap, User, Terminal, AlertTriangle, Table } from 'lucide-react'
+import { Zap, User, Terminal, AlertTriangle } from 'lucide-react'
 import { motion } from 'framer-motion'
-
-function DataTable({ tableData }) {
-  if (!tableData?.columns?.length || !tableData?.rows?.length) return null
-
-  return (
-    <motion.div
-      className="result-table-wrapper"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2, duration: 0.35 }}
-    >
-      <div className="result-table-header">
-        <Table size={12} />
-        <span>Query Results</span>
-        <span className="result-table-count">{tableData.rows.length} row{tableData.rows.length !== 1 ? 's' : ''}</span>
-      </div>
-      <div className="result-table-scroll">
-        <table className="result-table">
-          <thead>
-            <tr>
-              {tableData.columns.map((col, i) => (
-                <th key={i}>{col}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {tableData.rows.map((row, ri) => (
-              <tr key={ri}>
-                {row.map((cell, ci) => (
-                  <td key={ci}>{cell}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </motion.div>
-  )
-}
+import DataVisualization from './DataVisualization'
 
 function MessageBubble({ msg, index }) {
   const isError = msg.content?.startsWith('⚠️')
@@ -90,7 +52,7 @@ function MessageBubble({ msg, index }) {
             </motion.div>
           )}
 
-          {msg.tableData && <DataTable tableData={msg.tableData} />}
+          {msg.tableData && <DataVisualization tableData={msg.tableData} />}
 
           {msg.sql && (
             <motion.div

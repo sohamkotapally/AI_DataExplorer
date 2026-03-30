@@ -8,23 +8,43 @@ import uvicorn
 import pandas as pd
 import sqlite3
 import tempfile
+import shutil
 import os
 import io
 import re
 
 
 def clean_sql_quotes(sql):
-    """Fix mixed quoting issues the LLM generates for SQLite.
+    """Fix quoting and alias issues the LLM generates for SQLite.
     
     Handles patterns like:
       `"name"`  →  name
       `"data"`  →  data
       "name"    →  name  (for SQLite compatibility)
       `name`    →  name
+      AS Total Products  →  AS Total_Products  (multi-word aliases)
     """
+    # Remove backtick-wrapped double quotes: `"col"` → col
     sql = re.sub(r'`"([^"]+)"`', r'\1', sql)
+    # Remove standalone double quotes around identifiers
     sql = re.sub(r'"([^"]+)"', r'\1', sql)
+    # Remove standalone backticks
     sql = re.sub(r'`([^`]+)`', r'\1', sql)
+    
+    # Fix multi-word aliases: AS Total Products → AS Total_Products
+    # Match AS followed by 2+ capitalized/lowercase words before a comma, FROM, 
+    # WHERE, ORDER, GROUP, HAVING, LIMIT, UNION, ), ;, or end of string
+    def fix_alias(match):
+        alias_words = match.group(1).strip()
+        return f"AS {alias_words.replace(' ', '_')}"
+    
+    sql = re.sub(
+        r'\bAS\s+([A-Za-z_][A-Za-z0-9_ ]*?[A-Za-z0-9_])(?=\s*(?:,|\bFROM\b|\bWHERE\b|\bORDER\b|\bGROUP\b|\bHAVING\b|\bLIMIT\b|\bUNION\b|\)|;|$))',
+        fix_alias,
+        sql,
+        flags=re.IGNORECASE
+    )
+    
     return sql
 
 app = FastAPI()
@@ -130,6 +150,30 @@ async def upload_status():
     if uploaded_file_info:
         return {"loaded": True, **uploaded_file_info}
     return {"loaded": False}
+
+
+@app.post("/clear-upload")
+async def clear_upload():
+    """Remove the currently uploaded file and reset to default database."""
+    global uploaded_db, uploaded_chain, uploaded_file_info
+
+    if uploaded_db is not None:
+        try:
+            # Get the db file path to clean up the temp directory
+            db_url = str(uploaded_db._engine.url)
+            if db_url.startswith("sqlite:///"):
+                db_path = db_url.replace("sqlite:///", "")
+                tmp_dir = os.path.dirname(db_path)
+                if os.path.exists(tmp_dir) and tmp_dir.startswith(tempfile.gettempdir()):
+                    shutil.rmtree(tmp_dir, ignore_errors=True)
+        except Exception:
+            pass
+
+    uploaded_db = None
+    uploaded_chain = None
+    uploaded_file_info = None
+
+    return {"message": "Uploaded file cleared. Reverted to default database."}
 
 
 @app.post("/ask")

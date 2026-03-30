@@ -1,7 +1,7 @@
-import { Plus, MessageSquare, Trash2, Zap, FileSpreadsheet } from 'lucide-react'
+import { Plus, MessageSquare, Trash2, Zap, FileSpreadsheet, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-function Sidebar({ chats, activeId, setActiveId, startNewChat, deleteChat, uploadedFile }) {
+function Sidebar({ chats, activeId, setActiveId, startNewChat, deleteChat, uploadedFile, onClearFile }) {
   return (
     <motion.div 
       className="sidebar"
@@ -32,7 +32,7 @@ function Sidebar({ chats, activeId, setActiveId, startNewChat, deleteChat, uploa
         <span>New Chat</span>
       </motion.button>
 
-      {/* Uploaded File Badge */}
+      {/* Uploaded File Badge with Remove button */}
       <AnimatePresence>
         {uploadedFile && (
           <motion.div 
@@ -47,6 +47,18 @@ function Sidebar({ chats, activeId, setActiveId, startNewChat, deleteChat, uploa
               <span className="uploaded-file-name">{uploadedFile.filename}</span>
               <span className="uploaded-file-rows">{uploadedFile.rows} rows · {uploadedFile.columns} cols</span>
             </div>
+            <motion.div
+              className="clear-file-btn"
+              onClick={(e) => {
+                e.stopPropagation()
+                onClearFile?.()
+              }}
+              whileHover={{ scale: 1.15, backgroundColor: 'rgba(255, 107, 107, 0.2)' }}
+              whileTap={{ scale: 0.9 }}
+              title="Remove uploaded file"
+            >
+              <X size={13} />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
