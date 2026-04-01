@@ -14,6 +14,7 @@ function App() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [visualize, setVisualize] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('retail-chat-history', JSON.stringify(chats));
@@ -59,7 +60,7 @@ function App() {
         tableData = res.data.table_data || null;
       }
 
-      const aiMessage = { role: 'ai', content: aiContent, sql: sqlQuery, tableData };
+      const aiMessage = { role: 'ai', content: aiContent, sql: sqlQuery, tableData, visualize };
 
       setChats(prevChats => prevChats.map(chat =>
         chat.id === activeId
@@ -135,6 +136,8 @@ function App() {
         handleKeyDown={handleKeyDown}
         loading={loading}
         onUploadComplete={handleUploadComplete}
+        visualize={visualize}
+        setVisualize={setVisualize}
       />
     </div>
   )

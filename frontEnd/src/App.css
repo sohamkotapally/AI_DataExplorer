@@ -604,7 +604,6 @@ body {
   line-height: 1.6;
 }
 
-/* ── Result Table ── */
 
 .result-table-wrapper {
   margin-top: 16px;
@@ -852,6 +851,100 @@ body {
   cursor: default;
 }
 
+.viz-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.viz-toggle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  opacity: 0;
+  background: var(--accent-gradient);
+  transition: opacity 0.4s ease;
+  z-index: 0;
+}
+
+.viz-toggle.active::before {
+  opacity: 0.12;
+}
+
+.viz-toggle>* {
+  position: relative;
+  z-index: 1;
+}
+
+.viz-toggle:hover {
+  border-color: rgba(108, 92, 231, 0.3);
+  color: var(--text-secondary);
+  background: rgba(108, 92, 231, 0.04);
+}
+
+.viz-toggle.active {
+  border-color: rgba(108, 92, 231, 0.45);
+  color: var(--accent-light);
+  box-shadow:
+    0 0 20px rgba(108, 92, 231, 0.12),
+    0 0 40px rgba(108, 92, 231, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.viz-toggle.active:hover {
+  border-color: rgba(108, 92, 231, 0.55);
+  box-shadow:
+    0 0 24px rgba(108, 92, 231, 0.18),
+    0 0 48px rgba(108, 92, 231, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.toggle-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.viz-toggle.active .toggle-checkbox {
+  background: var(--accent-gradient);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 2px 8px rgba(108, 92, 231, 0.4);
+}
+
+.viz-toggle-label {
+  letter-spacing: 0.01em;
+}
+
+.inline-table-wrapper {
+  margin-top: 16px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
 pre {
   background: #0d0d0d !important;
   padding: 16px !important;
@@ -866,9 +959,6 @@ code {
   font-size: 0.85rem;
 }
 
-/* ══════════════════════════════════════════════════════ */
-/*  DATA VISUALIZATION — Power BI-style Chart Styles    */
-/* ══════════════════════════════════════════════════════ */
 
 .viz-wrapper {
   margin-top: 16px;
@@ -884,7 +974,6 @@ code {
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-/* ── Header bar ── */
 .viz-header {
   display: flex;
   align-items: center;
@@ -922,7 +1011,6 @@ code {
   text-transform: none;
 }
 
-/* ── Chart type switcher ── */
 .viz-switcher {
   display: flex;
   align-items: center;
@@ -965,13 +1053,11 @@ code {
   display: inline;
 }
 
-/* ── Chart body ── */
 .viz-body {
   padding: 16px 12px;
   min-height: 200px;
 }
 
-/* ── Custom Tooltip ── */
 .chart-tooltip {
   background: rgba(20, 20, 24, 0.95);
   backdrop-filter: blur(16px);
@@ -1021,7 +1107,6 @@ code {
   font-size: 0.78rem;
 }
 
-/* ── KPI Card ── */
 .kpi-card {
   margin-top: 16px;
   padding: 28px 32px;
@@ -1056,7 +1141,6 @@ code {
   letter-spacing: 0.06em;
 }
 
-/* ── Recharts overrides ── */
 .recharts-cartesian-grid line {
   stroke: rgba(255, 255, 255, 0.04) !important;
 }
@@ -1089,7 +1173,6 @@ code {
   opacity: 0.85;
 }
 
-/* ── Responsive ── */
 @media (max-width: 768px) {
   .sidebar {
     width: 220px;
@@ -1115,5 +1198,13 @@ code {
 
   .kpi-value {
     font-size: 2rem;
+  }
+
+  .viz-toggle-label {
+    display: none;
+  }
+
+  .viz-toggle {
+    padding: 7px 10px;
   }
 }

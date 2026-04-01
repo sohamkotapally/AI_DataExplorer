@@ -44,10 +44,8 @@ function EmptyState({ onSuggestionClick, onUploadComplete }) {
         <p className="hero-subtitle">Your AI-powered data companion</p>
       </motion.div>
 
-      {/* File Upload */}
       <FileUpload onUploadComplete={onUploadComplete} />
 
-      {/* Divider */}
       <motion.div 
         className="empty-divider"
         initial={{ opacity: 0, scaleX: 0 }}
@@ -57,7 +55,6 @@ function EmptyState({ onSuggestionClick, onUploadComplete }) {
         <span>or try a sample question</span>
       </motion.div>
 
-      {/* Suggestions */}
       <motion.div
         className="suggestions-grid"
         variants={container}

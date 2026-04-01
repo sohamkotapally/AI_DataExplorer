@@ -9,7 +9,6 @@ function Sidebar({ chats, activeId, setActiveId, startNewChat, deleteChat, uploa
       animate={{ x: 0, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 260, damping: 28 }}
     >
-      {/* Brand */}
       <div className="sidebar-brand">
         <motion.div 
           className="sidebar-brand-icon"
@@ -21,7 +20,6 @@ function Sidebar({ chats, activeId, setActiveId, startNewChat, deleteChat, uploa
         <span className="sidebar-brand-text">Nexus</span>
       </div>
 
-      {/* New Chat Button */}
       <motion.button 
         className="new-chat-btn" 
         onClick={startNewChat}
@@ -32,7 +30,6 @@ function Sidebar({ chats, activeId, setActiveId, startNewChat, deleteChat, uploa
         <span>New Chat</span>
       </motion.button>
 
-      {/* Uploaded File Badge with Remove button */}
       <AnimatePresence>
         {uploadedFile && (
           <motion.div 
@@ -63,7 +60,6 @@ function Sidebar({ chats, activeId, setActiveId, startNewChat, deleteChat, uploa
         )}
       </AnimatePresence>
 
-      {/* Chat History */}
       <div className="sidebar-label">Recent</div>
       <div className="history-list">
         <AnimatePresence>

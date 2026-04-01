@@ -15,25 +15,19 @@ import re
 
 
 def clean_sql_quotes(sql):
-    """Fix quoting and alias issues the LLM generates for SQLite.
-    
-    Handles patterns like:
-      `"name"`  →  name
-      `"data"`  →  data
-      "name"    →  name  (for SQLite compatibility)
-      `name`    →  name
-      AS Total Products  →  AS Total_Products  (multi-word aliases)
-    """
-    # Remove backtick-wrapped double quotes: `"col"` → col
     sql = re.sub(r'`"([^"]+)"`', r'\1', sql)
-    # Remove standalone double quotes around identifiers
+    
+    def preserve_func_string_args(match):
+        return match.group(0).replace('"', "'")
+    sql = re.sub(
+        r'\b\w+\s*\(\s*"[^"]*"',
+        preserve_func_string_args,
+        sql
+    )
+    
     sql = re.sub(r'"([^"]+)"', r'\1', sql)
-    # Remove standalone backticks
     sql = re.sub(r'`([^`]+)`', r'\1', sql)
     
-    # Fix multi-word aliases: AS Total Products → AS Total_Products
-    # Match AS followed by 2+ capitalized/lowercase words before a comma, FROM, 
-    # WHERE, ORDER, GROUP, HAVING, LIMIT, UNION, ), ;, or end of string
     def fix_alias(match):
         alias_words = match.group(1).strip()
         return f"AS {alias_words.replace(' ', '_')}"
@@ -63,13 +57,12 @@ db = None
 llm = None
 chain = None
 
-uploaded_db = None       
-uploaded_chain = None   
-uploaded_file_info = None  
+uploaded_db = None
+uploaded_chain = None
+uploaded_file_info = None
 
 
 def get_llm():
-    """Lazily initialize the LLM."""
     global llm
     if llm is None:
         llm = ChatOllama(model="llama3", temperature=0)
@@ -77,7 +70,6 @@ def get_llm():
 
 
 def get_default_db_and_chain():
-    """Lazily initialize the default MySQL database and chain."""
     global db, chain
     if db is None:
         db = SQLDatabase.from_uri(mysql_uri)
@@ -91,7 +83,6 @@ class QueryRequest(BaseModel):
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    """Accept CSV/XLSX/XLS/TSV/JSON and load into a temp SQLite database."""
     global uploaded_db, uploaded_chain, uploaded_file_info
 
     try:
@@ -146,7 +137,6 @@ async def upload_file(file: UploadFile = File(...)):
 
 @app.get("/upload-status")
 async def upload_status():
-    """Check if a file is currently loaded."""
     if uploaded_file_info:
         return {"loaded": True, **uploaded_file_info}
     return {"loaded": False}
@@ -154,12 +144,10 @@ async def upload_status():
 
 @app.post("/clear-upload")
 async def clear_upload():
-    """Remove the currently uploaded file and reset to default database."""
     global uploaded_db, uploaded_chain, uploaded_file_info
 
     if uploaded_db is not None:
         try:
-            # Get the db file path to clean up the temp directory
             db_url = str(uploaded_db._engine.url)
             if db_url.startswith("sqlite:///"):
                 db_path = db_url.replace("sqlite:///", "")
@@ -211,9 +199,9 @@ async def ask_database(request: QueryRequest):
                 columns = list(result.keys())
                 rows = [list(str(v) for v in row) for row in result.fetchall()]
                 if columns and rows:
-                    table_data = {"columns": columns, "rows": rows[:100]}  
+                    table_data = {"columns": columns, "rows": rows[:100]}
         except Exception:
-            pass  
+            pass
 
         summary_prompt = (
             f"User Question: {request.question}\n"

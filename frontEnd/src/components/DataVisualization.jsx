@@ -11,7 +11,6 @@ import {
   transformForChart, CHART_COLORS, GRADIENT_PAIRS,
 } from '../utils/chartUtils'
 
-// ── Chart type icon mapping ──
 const CHART_ICONS = {
   bar: BarChart3,
   horizontal_bar: ArrowRightLeft,
@@ -34,7 +33,6 @@ const CHART_LABELS = {
   table: 'Table',
 }
 
-// ── Custom dark tooltip ──
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
   return (
@@ -51,7 +49,6 @@ function CustomTooltip({ active, payload, label }) {
   )
 }
 
-// ── Pie chart custom label ──
 function renderPieLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }) {
   const RADIAN = Math.PI / 180
   const radius = innerRadius + (outerRadius - innerRadius) * 1.4
@@ -65,7 +62,6 @@ function renderPieLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent, n
   )
 }
 
-// ── KPI Card for single values ──
 function KpiCard({ tableData, analysis }) {
   const value = tableData.rows[0]?.[analysis.numericCols[0]?.index ?? 0]
   const label = analysis.numericCols[0]?.name || tableData.columns[0]
@@ -82,7 +78,6 @@ function KpiCard({ tableData, analysis }) {
   )
 }
 
-// ── Data Table (preserved from MessageBubble) ──
 function DataTable({ tableData }) {
   if (!tableData?.columns?.length || !tableData?.rows?.length) return null
   return (
@@ -108,8 +103,6 @@ function DataTable({ tableData }) {
     </div>
   )
 }
-
-// ── Common axis/grid styling ──
 const AXIS_STYLE = {
   tick: { fill: '#7a7a85', fontSize: 12, fontFamily: 'Inter, sans-serif' },
   axisLine: { stroke: 'rgba(255,255,255,0.08)' },
@@ -117,7 +110,6 @@ const AXIS_STYLE = {
 }
 const GRID_STYLE = { strokeDasharray: '3 6', stroke: 'rgba(255,255,255,0.06)' }
 
-// ── Chart Renderers ──
 
 function BarChartView({ data, analysis }) {
   const valueKeys = analysis.numericCols.map(c => c.name)
@@ -329,7 +321,6 @@ function HistogramView({ data }) {
   )
 }
 
-// ── Main DataVisualization Component ──
 
 function DataVisualization({ tableData }) {
   const analysis = useMemo(() => analyzeTableData(tableData), [tableData])
@@ -342,7 +333,6 @@ function DataVisualization({ tableData }) {
 
   if (!tableData?.columns?.length || !tableData?.rows?.length) return null
 
-  // KPI single-value card
   if (chartType === 'kpi' && !activeType) {
     return <KpiCard tableData={tableData} analysis={analysis} />
   }
@@ -378,7 +368,6 @@ function DataVisualization({ tableData }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
-      {/* ── Chart header + type switcher ── */}
       <div className="viz-header">
         <div className="viz-header-left">
           <LayoutGrid size={14} />
@@ -406,7 +395,6 @@ function DataVisualization({ tableData }) {
         </div>
       </div>
 
-      {/* ── Chart body ── */}
       <div className="viz-body">
         <AnimatePresence mode="wait">
           <motion.div
@@ -424,4 +412,5 @@ function DataVisualization({ tableData }) {
   )
 }
 
+export { DataTable }
 export default DataVisualization

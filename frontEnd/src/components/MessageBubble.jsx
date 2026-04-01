@@ -1,6 +1,6 @@
 import { Zap, User, Terminal, AlertTriangle } from 'lucide-react'
 import { motion } from 'framer-motion'
-import DataVisualization from './DataVisualization'
+import DataVisualization, { DataTable } from './DataVisualization'
 
 function MessageBubble({ msg, index }) {
   const isError = msg.content?.startsWith('⚠️')
@@ -52,7 +52,20 @@ function MessageBubble({ msg, index }) {
             </motion.div>
           )}
 
-          {msg.tableData && <DataVisualization tableData={msg.tableData} />}
+          {msg.tableData && msg.visualize === true && (
+            <DataVisualization tableData={msg.tableData} />
+          )}
+
+          {msg.tableData && msg.visualize !== true && (
+            <motion.div
+              className="inline-table-wrapper"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.35 }}
+            >
+              <DataTable tableData={msg.tableData} />
+            </motion.div>
+          )}
 
           {msg.sql && (
             <motion.div

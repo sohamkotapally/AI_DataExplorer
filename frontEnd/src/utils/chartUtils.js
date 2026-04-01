@@ -1,22 +1,16 @@
-/**
- * Chart utility functions for smart visualization detection.
- * Analyzes query result columns/rows and selects the best chart type.
- */
-
-// ── Curated color palette matching the app's accent theme ──
 export const CHART_COLORS = [
-  '#6c5ce7', // primary accent
-  '#a29bfe', // accent light
-  '#00cec9', // teal
-  '#fd79a8', // pink
-  '#fdcb6e', // gold
-  '#00b894', // green
-  '#e17055', // coral
-  '#74b9ff', // sky blue
-  '#b2bec3', // silver
-  '#55efc4', // mint
-  '#ffeaa7', // cream
-  '#dfe6e9', // light gray
+  '#6c5ce7',
+  '#a29bfe',
+  '#00cec9',
+  '#fd79a8',
+  '#fdcb6e',
+  '#00b894',
+  '#e17055',
+  '#74b9ff',
+  '#b2bec3',
+  '#55efc4',
+  '#ffeaa7',
+  '#dfe6e9',
 ]
 
 export const GRADIENT_PAIRS = [
@@ -30,8 +24,6 @@ export const GRADIENT_PAIRS = [
   ['#636e72', '#b2bec3'],
 ]
 
-// ── Type detection helpers ──
-
 function isNumericValue(val) {
   if (val === null || val === undefined || val === '') return false
   const str = String(val).trim()
@@ -42,12 +34,11 @@ function isNumericValue(val) {
 function isDateValue(val) {
   if (val === null || val === undefined || val === '') return false
   const str = String(val).trim()
-  // Check common date patterns
   const datePatterns = [
-    /^\d{4}-\d{2}-\d{2}/, // ISO date
-    /^\d{1,2}\/\d{1,2}\/\d{2,4}/, // US date
-    /^\d{1,2}-\d{1,2}-\d{2,4}/, // dash date
-    /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i, // month name
+    /^\d{4}-\d{2}-\d{2}/,
+    /^\d{1,2}\/\d{1,2}\/\d{2,4}/,
+    /^\d{1,2}-\d{1,2}-\d{2,4}/,
+    /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i,
   ]
   if (datePatterns.some(p => p.test(str))) {
     const d = new Date(str)
@@ -56,10 +47,14 @@ function isDateValue(val) {
   return false
 }
 
-/**
- * Analyze a column to determine its type.
- * Returns 'numeric', 'date', or 'categorical'
- */
+function isYearLike(rows, colIndex) {
+  const values = rows.map(r => r[colIndex]).filter(v => v !== null && v !== undefined && v !== '')
+  if (values.length < 2) return false
+  const nums = values.map(v => Number(String(v).trim())).filter(v => !isNaN(v))
+  if (nums.length / values.length < 0.8) return false
+  return nums.every(v => Number.isInteger(v) && v >= 1900 && v <= 2100)
+}
+
 function analyzeColumn(rows, colIndex) {
   const values = rows.map(r => r[colIndex]).filter(v => v !== null && v !== undefined && v !== '')
   if (values.length === 0) return 'categorical'
@@ -68,14 +63,14 @@ function analyzeColumn(rows, colIndex) {
   const dateCount = values.filter(isDateValue).length
   const ratio = numericCount / values.length
 
-  if (ratio > 0.8) return 'numeric'
+  if (ratio > 0.8) {
+    if (isYearLike(rows, colIndex)) return 'categorical'
+    return 'numeric'
+  }
   if (dateCount / values.length > 0.8) return 'date'
   return 'categorical'
 }
 
-/**
- * Analyze the full table data and return column metadata.
- */
 export function analyzeTableData(tableData) {
   if (!tableData?.columns?.length || !tableData?.rows?.length) return null
 
@@ -96,41 +91,32 @@ export function analyzeTableData(tableData) {
   }
 }
 
-/**
- * Auto-detect the best chart type based on data analysis.
- */
 export function detectChartType(analysis) {
   if (!analysis) return 'table'
 
   const { numericCols, categoricalCols, dateCols, rowCount } = analysis
 
-  // Single row = KPI card, no chart needed
   if (rowCount === 1 && numericCols.length === 1 && categoricalCols.length === 0) {
     return 'kpi'
   }
 
-  // Date + numeric → line chart
   if (dateCols.length >= 1 && numericCols.length >= 1) {
     return 'line'
   }
 
-  // Two numeric cols, no categorical → scatter
   if (numericCols.length >= 2 && categoricalCols.length === 0) {
     return 'scatter'
   }
 
-  // Single numeric column → histogram
   if (numericCols.length === 1 && categoricalCols.length === 0) {
     return 'histogram'
   }
 
-  // ≤ 8 categories + 1 numeric → pie/donut
   if (categoricalCols.length >= 1 && numericCols.length >= 1) {
     const catCol = categoricalCols[0]
     if (catCol.uniqueCount <= 8 && rowCount <= 8) {
       return 'pie'
     }
-    // Long labels → horizontal bar
     if (catCol.avgLabelLength > 12) {
       return 'horizontal_bar'
     }
@@ -140,9 +126,6 @@ export function detectChartType(analysis) {
   return 'table'
 }
 
-/**
- * Get available chart types for the current data.
- */
 export function getAvailableChartTypes(analysis) {
   if (!analysis) return ['table']
 
@@ -165,13 +148,9 @@ export function getAvailableChartTypes(analysis) {
     types.push('histogram')
   }
 
-  // Deduplicate
   return [...new Set(types)]
 }
 
-/**
- * Transform table data into Recharts-compatible format.
- */
 export function transformForChart(tableData, analysis, chartType) {
   if (!tableData || !analysis) return []
 
@@ -199,7 +178,6 @@ export function transformForChart(tableData, analysis, chartType) {
     }))
   }
 
-  // Default: bar, line, area, horizontal_bar
   const labelCol = (dateCols[0] || categoricalCols[0] || analysis.columns[0])
   const valueCols = numericCols.length > 0 ? numericCols : [analysis.columns[1] || analysis.columns[0]]
 
@@ -212,9 +190,6 @@ export function transformForChart(tableData, analysis, chartType) {
   })
 }
 
-/**
- * Generate histogram bins from a single numeric column.
- */
 function generateHistogramBins(tableData, colIndex, binCount = 10) {
   const values = tableData.rows
     .map(r => Number(r[colIndex]))

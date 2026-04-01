@@ -15,7 +15,7 @@ const ACCEPTED_MIME = [
 function FileUpload({ onUploadComplete }) {
   const [dragActive, setDragActive] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [uploadResult, setUploadResult] = useState(null) // { success, message }
+  const [uploadResult, setUploadResult] = useState(null)
   const inputRef = useRef(null)
 
   const isValidFile = (file) => {
@@ -38,7 +38,7 @@ function FileUpload({ onUploadComplete }) {
     try {
       const res = await axios.post('http://localhost:8000/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 120000, // 2 minute timeout for large files + LLM chain init
+        timeout: 120000,
       })
 
       if (res.data.error) {
